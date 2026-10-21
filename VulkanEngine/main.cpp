@@ -4,11 +4,13 @@
 #include <iostream>
 #include <stdexcept>
 #include <cstdlib>
+#include <vector>
+
+const uint32_t WIDTH = 800; // Constant Width
+const uint32_t HEIGHT = 600; // Constant Height
 
 class HelloTriangleApplication {
 public:
-    const uint32_t WIDTH = 800; // Constant Width
-    const uint32_t HEIGHT = 600; // Constant Height
 
     void run() {
         initWindow();
@@ -45,7 +47,6 @@ private:
 
         uint32_t glfwExtensionCount = 0;
         const char** glfwExtensions;
-
         glfwExtensions = glfwGetRequiredInstanceExtensions(&glfwExtensionCount);
 
         createInfo.enabledExtensionCount = glfwExtensionCount;
@@ -55,6 +56,19 @@ private:
 
         if (vkCreateInstance(&createInfo, nullptr, &instance) != VK_SUCCESS) {
             throw std::runtime_error("failed to create instance!");
+        }
+
+        uint32_t extensionCount = 0;
+        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, nullptr);
+
+        std::vector<VkExtensionProperties> extensions(extensionCount);
+
+        vkEnumerateInstanceExtensionProperties(nullptr, &extensionCount, extensions.data());
+
+        std::cout << "Available Extensions:\n";
+
+        for (const auto& extension : extensions) {
+            std::cout << '\t' << extension.extensionName << '\n';
         }
     }
 
@@ -69,6 +83,8 @@ private:
     }
 
     void cleanup() {
+        vkDestroyInstance(instance, nullptr);
+
         glfwDestroyWindow(window);
         glfwTerminate();
     }
